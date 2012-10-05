@@ -1,0 +1,49 @@
+#! /bin/sh
+
+
+function usage() {
+    echo "Creates a new script file and adds a header to the file according to the file extension"
+}
+
+
+if [ -z $1 ] ; then
+    echo `usage`
+    exit 1
+fi
+
+filename=$1
+
+if [ "$filename" == "-h" ] || [ "$filename" == "--help" ]
+then
+    echo `usage`
+    exit
+fi
+
+if [ -f $filename ] ; then
+    echo "$filename already exists."
+    exit 2
+fi
+
+case $filename in
+    *.py)
+        echo '#!/usr/bin/env python2' >> $filename
+        echo '# -*- coding: utf-8 -*-'>> $filename
+        echo >> $filename
+        ;;
+
+    *.pl)
+        echo '#!/usr/bin/env perl' >> $filename
+        echo >> $filename
+        echo 'use warnings;' >> $filename
+        echo 'use strict;' >> $filename
+        echo >> $filename
+        ;;
+
+    *.sh)
+        echo '#!/usr/bin/env sh' >> $filename
+        echo "# - $filename" >> $filename
+        echo >> $filename
+        ;;
+esac
+
+[[ -f $filename ]] && chmod u+x $filename

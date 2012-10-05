@@ -1,0 +1,19 @@
+#!/usr/bin/env sh
+# nautilus -*- mode: sh -*- vim: set ft=sh:
+
+args=("$@")
+file="$HOME"
+
+if [ "${#args[@]}" -ne 0 ]; then
+	file=${args[-1]}
+fi
+
+if [[ -x /usr/bin/nautilus ]]; then
+    exec nautilus "$@"
+elif [[ -x /usr/bin/i3-sensible-terminal ]]; then
+    exec i3-sensible-terminal -e mc "$file"
+else
+    echo "No applicable program found"
+    exit 1
+fi
+

@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+# mktransparent -*- mode: sh -*-
+
+transset-df -a 0.8 > /dev/null 2>/dev/null
