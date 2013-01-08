@@ -1,5 +1,8 @@
-#!/usr/bin/env sh
-# nautilus -*- mode: sh -*- vim: set ft=sh:
+#!/bin/sh
+# vim: ft=sh
+#
+# nautilus
+#
 
 args=("$@")
 file="$HOME"
@@ -11,7 +14,11 @@ fi
 if [[ -x /usr/bin/nautilus ]]; then
     exec nautilus "$@"
 elif [[ -x /usr/bin/i3-sensible-terminal ]]; then
-    exec i3-sensible-terminal -e mc "$file"
+    if [[ -x /usr/bin/ranger ]]; then
+        exec i3-sensible-terminal -e ranger "$file"
+    elif [[ -x /usr/bin/mc ]]; then
+        exec i3-sensible-terminal -e mc "$file"
+    fi
 else
     echo "No applicable program found"
     exit 1
