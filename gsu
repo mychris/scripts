@@ -1,0 +1,23 @@
+#!/usr/bin/bash
+
+if [ ! -d ".git" ]; then
+    echo "not the root of a git repository"
+    exit 1
+fi
+  
+cur=`pwd`
+echo "found $(git submodule status | wc -l) submodules"
+while read submodule; do
+    s=(${submodule// / })
+    if [ -n "${s[1]}" ]; then
+        cd "${s[1]}"
+
+        echo -e "\e[0;34mchecking '\e[0;33m${s[1]}\e[034m'\e[0m"
+        git checkout master
+        git pull
+
+        cd "$cur"
+    fi
+done <<< "$(git submodule status)"
+
+# vim: ft=sh:
