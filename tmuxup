@@ -1,0 +1,10 @@
+#!/bin/bash
+# Original dev by jasonwryan, https://bitbucket.org/jasonwryan
+# Thanks to https://bitbucket.org/jasonwryan/centurion/src/2c63835765d1/Scripts/tmuxup?at=default
+#
+awk -F"[, ]" '{ 
+    if (NF==17)
+        print $4
+    else
+        print $4,$5
+    }' <(uptime) | sed 's/^ *//g'
