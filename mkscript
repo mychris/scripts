@@ -1,49 +1,84 @@
-#! /bin/sh
-
+#!/usr/bin/bash
 
 function usage() {
-    echo "Creates a new script file and adds a header to the file according to the file extension"
+    echo "Usage: mkscript [OPTIONS]... FILE
+
+Creates a new script file and adds a header to the file according to the file \
+exenstion.
+If a template.\"type\" exists in ~/Templates, the content of this file will be \
+used as content for the new created script file.
+Makes the script file executeable.
+
+  -t  type of the script file, must be the file extension
+  -n  make the created file not executeable
+  -h  display this help and exit"
 }
 
+filename=""
+type_to_create=""
+make_exec=1
 
-if [ -z $1 ] ; then
-    echo `usage`
-    exit 1
-fi
+while getopts t:nh OPT; do
+    case "$OPT" in
+        t) type_to_create=$OPTARG ;;
+        n) make_exec=0 ;;
+        h) usage ; exit 0 ;;
+        \?) usage ; exit 1 ;;
+    esac
+done
 
-filename=$1
+shift `expr $OPTIND - 1`
 
-if [ "$filename" == "-h" ] || [ "$filename" == "--help" ]
-then
-    echo `usage`
-    exit
-fi
+[ $# -eq 0 ] && { usage ; exit 1 ; }
 
-if [ -f $filename ] ; then
-    echo "$filename already exists."
+filename="$1"
+
+[ -z "$type_to_create" ] && type_to_create="$(echo $filename |awk -F . '{if (NF>1) {print $NF}}')"
+[ -z "$type_to_create" ] && { echo "No type found" ; exit 1 ; }
+[ -f $filename ] && { echo "File '$filename' already exists." ; exit 2 ; }
+
+if ! touch $filename ; then
+    echo "Can not touch '$filename'."
     exit 2
 fi
 
-case $filename in
-    *.py)
-        echo '#!/usr/bin/env python2' >> $filename
-        echo '# -*- coding: utf-8 -*-'>> $filename
-        echo >> $filename
-        ;;
+template="${HOME}/Tempaltes/template.${type_to_create}"
 
-    *.pl)
-        echo '#!/usr/bin/env perl' >> $filename
-        echo >> $filename
-        echo 'use warnings;' >> $filename
-        echo 'use strict;' >> $filename
-        echo >> $filename
-        ;;
+if [ -f "$template" ]; then
+    cat "$template" >> $filename
+else
+    case $type_to_create in
+        py)
+            echo '#!/usr/bin/env python' >> $filename
+            echo '# -*- coding: utf-8 -*-'>> $filename
+            echo >> $filename
+            ;;
 
-    *.sh)
-        echo '#!/usr/bin/env sh' >> $filename
-        echo "# - $filename" >> $filename
-        echo >> $filename
-        ;;
-esac
+        pl)
+            echo '#!/usr/bin/env perl' >> $filename
+            echo >> $filename
+            echo 'use warnings;' >> $filename
+            echo 'use strict;' >> $filename
+            echo >> $filename
+            ;;
 
-[[ -f $filename ]] && chmod u+x $filename
+        sh)
+            echo '#!/usr/bin/env sh' >> $filename
+            echo "# - $filename" >> $filename
+            echo >> $filename
+            ;;
+        bash)
+            echo '#!/usr/bin/bash' >> $filename
+            echo "# - $filename" >> $filename
+            echo >> $filename
+            echo >> $filename
+            echo "# vim: ft=sh:" >> $filename
+            ;;
+    esac
+fi
+
+[ -f $filename ] && [ $make_exec -eq 1 ] && chmod u+x $filename
+
+exit 0
+
+
