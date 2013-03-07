@@ -1,0 +1,39 @@
+#!/usr/bin/env sh
+# - aurget
+
+function usage() {
+    echo "Usage: aurget [OPTIONS]... PACKAGE
+
+Downloads the specified Package from the AUR and extracts it.
+
+  -h  display this help end exit"
+}
+
+package=""
+
+while getopts h OPT; do
+    case "$OPT" in
+        h) usage ; exit 0 ;;
+        \?) usage ; exit 1 ;;
+    esac
+done
+
+shift `expr $OPTIND - 1`
+
+[ $# -eq 0 ] && { usage ; exit 1 ; }
+
+package="$1"
+short="${package:0:2}"
+tar="${package}.tar.gz"
+url="https://aur.archlinux.org/packages/${short}/${package}/${package}.tar.gz"
+
+[ -f $tar ] && { echo "archive '$tar' already in this folder" ; exit 2 ; }
+
+wget -q --spider "$url" || { echo "$package not found '$url'" ; exit 2; }
+
+wget "$url"
+
+tar -zxvf $tar
+
+rm -f $tar
+
