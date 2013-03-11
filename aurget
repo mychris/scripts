@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 # - aurget
 
 function usage() {
@@ -25,15 +25,17 @@ shift `expr $OPTIND - 1`
 package="$1"
 short="${package:0:2}"
 tar="${package}.tar.gz"
-url="https://aur.archlinux.org/packages/${short}/${package}/${package}.tar.gz"
+url="https://aur.archlinux.org/packages/${short}/${package}/${tar}"
 
 [ -f $tar ] && { echo "archive '$tar' already in this folder" ; exit 2 ; }
 
-wget -q --spider "$url" || { echo "$package not found '$url'" ; exit 2; }
+wget -q --spider "$url" || { echo "$package not found '$url'" ; exit 2 ; }
 
 wget "$url"
 
 tar -zxvf $tar
 
 rm -f $tar
+
+exit 0
 

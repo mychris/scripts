@@ -1,8 +1,6 @@
-#!/bin/sh
-# vim: set ft=sh :
+#!/usr/bin/env sh
 
-
-if ! `which pygmentize >/dev/null 2>&1`; then
+if ! `which pygmentize &>/dev/null`; then
     echo "pygmentize not found"
     echo "easy_install it"
     exit 1
@@ -13,10 +11,11 @@ if [ ! -t 0 ]; then
 elif [ -f $1 ]; then
     file=$1
 else
-    echo "Usage: $0 code.c"
-    echo "or e.g. head code.c | $0"
+    echo "Usage: ccat code.c"
+    echo "or e.g. head code.c | ccat"
     exit 2
 fi
 
 pygmentize -f terminal -g $file
 
+# vim: ft=sh:

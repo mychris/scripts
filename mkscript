@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/usr/bin/env bash
 
 function usage() {
     echo "Usage: mkscript [OPTIONS]... FILE
@@ -10,7 +10,7 @@ used as content for the new created script file.
 Makes the script file executeable.
 
   -t  type of the script file, must be the file extension
-  -n  make the created file not executeable
+  -n  make the created file NOT executeable
   -h  display this help and exit"
 }
 
@@ -68,7 +68,7 @@ else
             echo >> $filename
             ;;
         bash)
-            echo '#!/usr/bin/bash' >> $filename
+            echo '#!/usr/bin/env bash' >> $filename
             echo "# - $filename" >> $filename
             echo >> $filename
             echo >> $filename
@@ -80,5 +80,4 @@ fi
 [ -f $filename ] && [ $make_exec -eq 1 ] && chmod u+x $filename
 
 exit 0
-
 

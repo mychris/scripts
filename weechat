@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/usr/bin/env bash
 
 command -v weechat-curses >/dev/null 2>&1 || { echo >&2 "weechat-curses not found"; exit 1; }
 

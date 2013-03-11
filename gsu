@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/usr/bin/env bash
 
 if [ ! -d ".git" ]; then
     echo "not the root of a git repository"
@@ -7,6 +7,7 @@ fi
   
 cur=`pwd`
 echo "found $(git submodule status | wc -l) submodules"
+
 while read submodule; do
     s=(${submodule// / })
     if [ -n "${s[1]}" ]; then
