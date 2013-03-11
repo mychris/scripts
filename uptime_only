@@ -1,0 +1,25 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+import shlex
+import sys
+
+seconds = int(float(shlex.split(open('/proc/uptime', 'r').readlines()[0])[0]))
+
+if seconds < 60:
+    sys.stdout.write('%02d Sec' % (seconds))
+elif seconds < 60 * 60:
+    sys.stdout.write('%02d Min' % (seconds / 60))
+else:
+    mins = int(seconds / 60 % 60)
+    hours = int(seconds / 60 / 60 % 24)
+    days = int(seconds / 60 / 60 / 24)
+    day_string = 'Days' if days > 1 else 'Day'
+
+    if days > 0:
+        sys.stdout.write('%d %s %02d:%02d' % (days, day_string, hours, mins))
+    else:
+        sys.stdout.write('%02d:%02d' % (hours, mins))
+
+sys.stdout.write('\n')
+
