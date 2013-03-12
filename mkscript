@@ -37,11 +37,6 @@ filename="$1"
 [ -z "$type_to_create" ] && { echo "No type found" ; exit 1 ; }
 [ -f $filename ] && { echo "File '$filename' already exists." ; exit 2 ; }
 
-if ! touch $filename ; then
-    echo "Can not touch '$filename'."
-    exit 2
-fi
-
 template="${HOME}/Tempaltes/template.${type_to_create}"
 
 if [ -f "$template" ]; then
@@ -51,6 +46,9 @@ else
         py)
             echo '#!/usr/bin/env python' >> $filename
             echo '# -*- coding: utf-8 -*-'>> $filename
+            echo >> $filename
+            echo 'import os' >> $filename
+            echo 'import sys' >> $filename
             echo >> $filename
             ;;
 
@@ -64,15 +62,27 @@ else
 
         sh)
             echo '#!/usr/bin/env sh' >> $filename
-            echo "# - $filename" >> $filename
+            echo >> $filename
             echo >> $filename
             ;;
+
         bash)
             echo '#!/usr/bin/env bash' >> $filename
-            echo "# - $filename" >> $filename
             echo >> $filename
             echo >> $filename
             echo "# vim: ft=sh:" >> $filename
+            ;;
+
+        scm)
+            echo '#!/usr/bin/env guile' >> $filename
+            echo '!#' >> $filename
+            echo >> $filename
+            echo >> $filename
+            ;;
+            
+        *)
+            echo "Unknown script type $type_to_create"
+            exit 3
             ;;
     esac
 fi
