@@ -18,7 +18,7 @@ filename=""
 type_to_create=""
 make_exec=1
 
-while getopts t:nh OPT; do
+while getopts :t:nh OPT; do
     case "$OPT" in
         t) type_to_create=$OPTARG ;;
         n) make_exec=0 ;;
@@ -77,6 +77,17 @@ else
             echo '#!/usr/bin/env guile' >> $filename
             echo '!#' >> $filename
             echo >> $filename
+            echo >> $filename
+            ;;
+
+        tex)
+            echo '\documentclass[11pt]{article}' >> $filename
+            echo '\title{}' >> $filename
+            echo '\author{<your name here>}' >> $filename
+            echo '\begin{document}' >> $filename
+            echo '\maketitle' >> $filename
+            echo '\section{}' >> $filename
+            echo '\end{document}' >> $filename
             echo >> $filename
             ;;
             
