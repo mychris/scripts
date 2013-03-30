@@ -1,0 +1,17 @@
+#!/usr/bin/env sh
+#
+# Prezi key bindings for the Logitech R400 Wireless Presenter
+#
+
+if [ "$1" = "go" -o "$1" = "start" ]; then
+    echo 'Bound keys for prezi presentation'
+    echo '112 = Left, 117 = Right'
+    xmodmap -e "keycode 112 = Left" -e "keycode 117 = Right"
+elif [ "$1" = "stop" ]; then
+    echo 'Bound keys back to normal'
+    echo '112 = Prior, 117 = Next'
+    xmodmap -e "keycode 112 = Prior" -e "keycode 117 = Next"
+else
+    echo 'give me start/go or stop!'
+    exit 1
+fi
