@@ -152,13 +152,13 @@ def main(stdscr):
         PAUSE = False
         pause_delta += time.time() - pause_begin
 
-    stdscr.erase()
     if not PAUSE:
+      stdscr.erase()
       try:
         render(max(time.time() - start - pause_delta, 0), stdscr)
       except curses.error:
         pass
-    stdscr.refresh()
+      stdscr.refresh()
     time.sleep(0.5)
 
 if __name__ == '__main__':
