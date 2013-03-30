@@ -66,16 +66,16 @@ NUMBERS = [
   ]
 ]
 
-SYMBOL, HOURS_ALWAYS, COLOR, PAUSE = '█', False, 'blue', False
+HOURS_ALWAYS, COLOR, PAUSE, CENTER = False, 'blue', False, False
 
 def render_char(char, stdsrc, offset_y, offset_x):
-  global NUMBERS, SYMBOL
+  global NUMBERS
 
   if char == ':':
-    stdsrc.addstr(offset_y + 1, offset_x, SYMBOL, curses.color_pair(1))
-    stdsrc.addstr(offset_y + 1, offset_x + 1, SYMBOL, curses.color_pair(1))
-    stdsrc.addstr(offset_y + 3, offset_x, SYMBOL, curses.color_pair(1))
-    stdsrc.addstr(offset_y + 3, offset_x + 1, SYMBOL, curses.color_pair(1))
+    stdsrc.addstr(offset_y + 1, offset_x, '█', curses.color_pair(1))
+    stdsrc.addstr(offset_y + 1, offset_x + 1, '█', curses.color_pair(1))
+    stdsrc.addstr(offset_y + 3, offset_x, '█', curses.color_pair(1))
+    stdsrc.addstr(offset_y + 3, offset_x + 1, '█', curses.color_pair(1))
     return 2
 
   col, row = 0, 0
@@ -83,13 +83,13 @@ def render_char(char, stdsrc, offset_y, offset_x):
     col = 0
     for b in arr:
       if b:
-        stdsrc.addstr(offset_y + row, offset_x + col, SYMBOL, curses.color_pair(1))
+        stdsrc.addstr(offset_y + row, offset_x + col, '█', curses.color_pair(1))
       col += 1
     row += 1
   return 6
 
 def render(delta, stdsrc):
-  global HOURS_ALWAYS
+  global HOURS_ALWAYS, CENTER
 
   hours, minutes, seconds = (delta / 60 / 60), (delta / 60) % 60, (delta) % 60
 
@@ -101,25 +101,42 @@ def render(delta, stdsrc):
     else:
       output_string = ('%d:%02d:%02d' % (hours, minutes, seconds))
 
-  x, y = 5, 3
+  if CENTER:
+    height, width = 9, 2
+    width += len([x for x in output_string if x == ':']) * 2
+    width += len([x for x in output_string if x.isdigit()]) * 6
+    width += (len(output_string) + 1) * 2
+
+    start_x = int((stdsrc.getmaxyx()[1] - width) / 2)
+    start_y = int((stdsrc.getmaxyx()[0] - height) / 2)
+  else:
+    start_x, start_y = 2, 1
+
+  x, y = start_x + 3, start_y + 2
   for char in output_string:
     x += render_char(char, stdsrc, y, x) + 2
 
-  max_x = x
-  x = 2
-  stdsrc.addstr(y - 2, x, '┏', curses.color_pair(1))
-  stdsrc.addstr(y + 6, x, '┗', curses.color_pair(1))
-  stdsrc.addstr(y - 2, max_x, '┓', curses.color_pair(1))
-  stdsrc.addstr(y + 6, max_x, '┛', curses.color_pair(1))
+  x, y, max_x = start_x, start_y, x
+
+  stdsrc.addstr(y, x, '┏', curses.color_pair(1))
+  stdsrc.addstr(y + 8, x, '┗', curses.color_pair(1))
+  stdsrc.addstr(y, max_x, '┓', curses.color_pair(1))
+  stdsrc.addstr(y + 8, max_x, '┛', curses.color_pair(1))
   for i in range(x + 1, max_x):
-    stdsrc.addstr(y - 2, i, '━', curses.color_pair(1))
-    stdsrc.addstr(y + 6, i, '━', curses.color_pair(1))
-  for i in range(y - 1, y + 6):
+    stdsrc.addstr(y, i, '━', curses.color_pair(1))
+    stdsrc.addstr(y + 8, i, '━', curses.color_pair(1))
+  for i in range(y + 1, y + 8):
     stdsrc.addstr(i, x, '┃', curses.color_pair(1))
     stdsrc.addstr(i, max_x, '┃', curses.color_pair(1))
 
   title = " Stopwatch "
-  stdsrc.addstr(y - 2, int((max_x + x - len(title)) / 2), title, curses.color_pair(1))
+  title_x = int((max_x + x - len(title)) / 2)
+  stdsrc.addstr(y, title_x, title, curses.color_pair(1))
+
+  if PAUSE:
+    paused = " PAUSE "
+    paused_x = int((max_x + x - len(paused)) / 2)
+    stdsrc.addstr(y + 8, paused_x, paused, curses.color_pair(1))
 
 def main(stdscr):
   global COLOR, PAUSE
@@ -152,25 +169,30 @@ def main(stdscr):
         PAUSE = False
         pause_delta += time.time() - pause_begin
 
-    if not PAUSE:
-      stdscr.erase()
-      try:
-        render(max(time.time() - start - pause_delta, 0), stdscr)
-      except curses.error:
-        pass
-      stdscr.refresh()
-    time.sleep(0.5)
+    stdscr.erase()
+    try:
+      if PAUSE:
+        delta = max(pause_begin - start - pause_delta, 0)
+      else:
+        delta = max(time.time() - start - pause_delta, 0)
+      render(delta, stdscr)
+    except curses.error:
+      pass
+    stdscr.refresh()
+    time.sleep(0.1)
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser(
       description='Simple ncurses stopwatch. Press space to pause and q to exit.',
       prog='simple-stopwatch', add_help=False)
 
-  parser.add_argument('--hours-always', dest='h', action='store_true',
+  parser.add_argument('--hours-always', dest='hours_always', action='store_true',
       default=False, help='display hours always')
   parser.add_argument('--color', choices=['black', 'blue', 'cyan', 'green',
-      'magenta', 'red', 'white', 'yellow', 'none'], default='blue', dest='c',
-      help='the color to use')
+      'magenta', 'red', 'white', 'yellow', 'none'], default='blue',
+      dest='color', help='the color to use')
+  parser.add_argument('--center', dest='center', action='store_true',
+      default=False, help='center stopwatch')
   parser.add_argument('--help', dest='help', action='store_true',
       default=False, help='show this help message and exit')
 
@@ -180,7 +202,7 @@ if __name__ == '__main__':
     parser.print_help()
     sys.exit()
 
-  HOURS_ALWAYS, COLOR = args.h, args.c
+  HOURS_ALWAYS, COLOR, CENTER = args.hours_always, args.color, args.center
   try:
     curses.wrapper(main)
   except KeyboardInterrupt:
