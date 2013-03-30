@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Simple ncurses stopwatch
+# Simple ncurses based terminal stopwatch
 #
 # Copyright (C) 2013 Christoph Göttschkes
 #
@@ -60,6 +60,7 @@ NUMBERS = [
 HOURS_ALWAYS, COLOR, PAUSE, CENTER = False, 'blue', False, False
 
 def render_char(char, stdsrc, offset_y, offset_x):
+  '''Render one character'''
   global NUMBERS
 
   if char == ':':
@@ -80,6 +81,7 @@ def render_char(char, stdsrc, offset_y, offset_x):
   return 6
 
 def render(delta, stdsrc):
+  '''render the stdsrc'''
   global HOURS_ALWAYS, CENTER
 
   hours, minutes, seconds = (delta / 60 / 60), (delta / 60) % 60, (delta) % 60
@@ -130,6 +132,7 @@ def render(delta, stdsrc):
     stdsrc.addstr(y + 8, paused_x, paused, curses.color_pair(1))
 
 def main(stdsrc):
+  '''main for curses.wrapper()'''
   global COLOR, PAUSE
 
   curses.noecho()
@@ -174,16 +177,20 @@ def main(stdsrc):
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser(
-      description='Simple ncurses stopwatch. Press space to pause and q to exit.',
+      description="""Simple ncurses based terminal stopwatch.
+Press space to pause and q to exit.""",
       prog='simple-stopwatch', add_help=False)
 
   parser.add_argument('--hours-always', dest='hours_always', action='store_true',
       default=False, help='display hours always')
+
   parser.add_argument('--color', choices=['black', 'blue', 'cyan', 'green',
       'magenta', 'red', 'white', 'yellow', 'none'], default='blue',
       dest='color', help='the color to use')
+
   parser.add_argument('--center', dest='center', action='store_true',
       default=False, help='center stopwatch')
+
   parser.add_argument('--help', dest='help', action='store_true',
       default=False, help='show this help message and exit')
 
