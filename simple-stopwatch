@@ -27,40 +27,31 @@ NUMBERS = [
   [
     [1, 1, 1, 1, 1, 1], [1, 1, 0, 0, 1, 1], [1, 1, 0, 0, 1, 1],
     [1, 1, 0, 0, 1, 1], [1, 1, 1, 1, 1, 1]
-  ],
-  [
+  ], [
     [0, 0, 0, 0, 1, 1], [0, 0, 0, 0, 1, 1], [0, 0, 0, 0, 1, 1],
     [0, 0, 0, 0, 1, 1], [0, 0, 0, 0, 1, 1]
-  ],
-  [
+  ], [
     [1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 1, 1], [1, 1, 1, 1, 1, 1],
     [1, 1, 0, 0, 0, 0], [1, 1, 1, 1, 1, 1]
-  ],
-  [
+  ], [
     [1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 1, 1], [1, 1, 1, 1, 1, 1],
     [0, 0, 0, 0, 1, 1], [1, 1, 1, 1, 1, 1]
-  ],
-  [
+  ], [
     [1, 1, 0, 0, 1, 1], [1, 1, 0, 0, 1, 1], [1, 1, 1, 1, 1, 1],
     [0, 0, 0, 0, 1, 1], [0, 0, 0, 0, 1, 1]
-  ],
-  [
+  ], [
     [1, 1, 1, 1, 1, 1], [1, 1, 0, 0, 0, 0], [1, 1, 1, 1, 1, 1],
     [0, 0, 0, 0, 1, 1], [1, 1, 1, 1, 1, 1]
-  ],
-  [
+  ], [
     [1, 1, 1, 1, 1, 1], [1, 1, 0, 0, 0, 0], [1, 1, 1, 1, 1, 1],
     [1, 1, 0, 0, 1, 1], [1, 1, 1, 1, 1, 1]
-  ],
-  [
+  ], [
     [1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 1, 1], [0, 0, 0, 0, 1, 1],
     [0, 0, 0, 0, 1, 1], [0, 0, 0, 0, 1, 1],
-  ],
-  [
+  ], [
     [1, 1, 1, 1, 1, 1], [1, 1, 0, 0, 1, 1], [1, 1, 1, 1, 1, 1],
     [1, 1, 0, 0, 1, 1], [1, 1, 1, 1, 1, 1]
-  ],
-  [
+  ], [
     [1, 1, 1, 1, 1, 1], [1, 1, 0, 0, 1, 1], [1, 1, 1, 1, 1, 1],
     [0, 0, 0, 0, 1, 1], [1, 1, 1, 1, 1, 1]
   ]
@@ -138,7 +129,7 @@ def render(delta, stdsrc):
     paused_x = int((max_x + x - len(paused)) / 2)
     stdsrc.addstr(y + 8, paused_x, paused, curses.color_pair(1))
 
-def main(stdscr):
+def main(stdsrc):
   global COLOR, PAUSE
 
   curses.noecho()
@@ -147,8 +138,8 @@ def main(stdscr):
   curses.start_color()
   curses.use_default_colors()
 
-  stdscr.keypad(1)
-  stdscr.nodelay(1)
+  stdsrc.keypad(1)
+  stdsrc.nodelay(1)
 
   colors = {'black': curses.COLOR_BLACK, 'blue': curses.COLOR_BLUE,
       'cyan': curses.COLOR_CYAN, 'green': curses.COLOR_GREEN,
@@ -159,7 +150,7 @@ def main(stdscr):
 
   start, pause_begin, pause_delta = time.time(), None, 0
   while True:
-    c = stdscr.getch()
+    c = stdsrc.getch()
     if c == ord('q') or c == ord('Q'):
       return
     if c == ord(' '):
@@ -169,16 +160,16 @@ def main(stdscr):
         PAUSE = False
         pause_delta += time.time() - pause_begin
 
-    stdscr.erase()
+    stdsrc.erase()
     try:
       if PAUSE:
         delta = max(pause_begin - start - pause_delta, 0)
       else:
         delta = max(time.time() - start - pause_delta, 0)
-      render(delta, stdscr)
+      render(delta, stdsrc)
     except curses.error:
       pass
-    stdscr.refresh()
+    stdsrc.refresh()
     time.sleep(0.1)
 
 if __name__ == '__main__':
