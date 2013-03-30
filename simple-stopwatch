@@ -154,7 +154,10 @@ def main(stdscr):
 
     stdscr.erase()
     if not PAUSE:
-      render(max(time.time() - start - pause_delta, 0), stdscr)
+      try:
+        render(max(time.time() - start - pause_delta, 0), stdscr)
+      except curses.error:
+        pass
     stdscr.refresh()
     time.sleep(0.5)
 
