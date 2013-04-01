@@ -37,7 +37,7 @@ filename="$1"
 [ -z "$type_to_create" ] && { echo "No type found" ; exit 1 ; }
 [ -f $filename ] && { echo "File '$filename' already exists." ; exit 2 ; }
 
-template="${HOME}/Tempaltes/template.${type_to_create}"
+template="${HOME}/Templates/template.${type_to_create}"
 
 if [ -f "$template" ]; then
     cat "$template" >> $filename
