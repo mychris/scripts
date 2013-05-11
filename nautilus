@@ -12,6 +12,8 @@ fi
 
 if [[ -x /usr/bin/nautilus ]]; then
     exec nautilus "$@"
+elif [[ -x /usr/bin/pcmanfm ]]; then
+    exec pcmanfm --new-win "$@"
 elif [[ -x /usr/bin/i3-sensible-terminal ]]; then
     if [[ -x /usr/bin/ranger ]]; then
         exec i3-sensible-terminal -e ranger "$file"
