@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+
+NAME="sxhkd"
+PID=`pidof $NAME`
+
+[[ $? != 0 ]] && printf "$NAME not running\n" && exit 1
+
+kill -s 10 $PID
