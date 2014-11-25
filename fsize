@@ -1,0 +1,9 @@
+#!/usr/bin/env sh
+
+if [ -z "${1+x}" ]; then
+  size="12"
+else
+  size=$1
+fi
+
+printf '\33]50;%s%d\007' "xft:Inconsolata:medium:autohint=true:antialias=true:pixelsize=" "${size}"
