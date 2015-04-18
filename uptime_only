@@ -17,10 +17,8 @@ else:
   day_string = 'Days' if days > 1 else 'Day'
 
   if days > 0:
-    sys.stdout.write('%d %s %02d:%02d' % (days, day_string, hours, mins))
+    sys.stdout.write('%d %s %02d:%02d\n' % (days, day_string, hours, mins))
   else:
-    sys.stdout.write('%02d:%02d' % (hours, mins))
-
-sys.stdout.write('\n')
+    sys.stdout.write('%02d:%02d\n' % (hours, mins))
 
 # vim: ft=python ts=2 sts=2 sw=2 et:
