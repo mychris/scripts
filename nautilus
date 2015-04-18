@@ -12,12 +12,14 @@ fi
 
 if [[ -x /usr/bin/nautilus ]]; then
     exec nautilus "$@"
-elif [[ -x /usr/bin/pcmanfm ]]; then
+elif [ $(command -v pcmanfm) ]]; then
     exec pcmanfm --new-win "$@"
-elif [[ -x /usr/bin/i3-sensible-terminal ]]; then
-    if [[ -x /usr/bin/ranger ]]; then
+elif [ $(command -v thunar) ]; then
+    exec thunar "$file"
+elif [ $(command -v i3-sensible-terminal) ]; then
+    if [ $(command -v ranger) ]; then
         exec i3-sensible-terminal -e ranger "$file"
-    elif [[ -x /usr/bin/mc ]]; then
+    elif [ $(command -v mc) ]; then
         exec i3-sensible-terminal -e mc "$file"
     fi
 else
