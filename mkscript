@@ -90,7 +90,18 @@ else
             echo '\end{document}' >> $filename
             echo >> $filename
             ;;
-            
+
+        c)
+            echo '#include <stdio.h>' >> $filename
+            echo '#include <stdlib.h>' >> $filename
+            echo >> $filename
+            echo 'int' >> $filename
+            echo 'main(int argc, char **argv)' >> $filename
+            echo '{' >> $filename
+            echo -e "\texit(EXIT_SUCCESS);" >> $filename
+            echo '}' >> $filename
+            ;;
+
         *)
             echo "Unknown script type $type_to_create"
             exit 3
