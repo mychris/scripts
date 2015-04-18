@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#/usr/bin/env sh
 
 if [ -z "${1+x}" ]; then
   size="12"
@@ -6,4 +6,15 @@ else
   size=$1
 fi
 
-printf '\33]50;%s%d\007' "xft:Inconsolata:medium:autohint=true:antialias=true:pixelsize=" "${size}"
+if [ -z "${2+x}" ]; then
+    face="medium"
+else
+    case $2 in
+        bold) face="bold" ;;
+        italic) face="italic" ;;
+        bolditalic) face="bold:italic" ;;
+        *) face="medium" ;;
+    esac
+fi
+
+printf '\33]50;%s%s%s%d\007' "xft:Inconsolata:" "${face}" ":autohint=true:antialias=true:pixelsize=" "${size}"
