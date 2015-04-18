@@ -1,0 +1,12 @@
+#!/bin/sh
+
+if [ $(command -v i3lock) ]; then
+    pic=`cat $HOME/.fehbg |sed -e "s/feh\s*--bg-[a-z]*//" -e "s/^\s*'//" -e "s/'\s*$//"`
+    exec i3lock -i "$pic"
+else
+    real=$(which -a xflock4 |awk 'NR==2 {print}')
+    if [ ! -z "${real+x}" ]; then
+        exec $($real)
+    fi
+fi
+
