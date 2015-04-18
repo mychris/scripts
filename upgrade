@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+sudo -k
+
+pac=`which pacman`
+apt=`which apt-get`
+
+if [ -x "$pac" ]; then
+    sudo $pac -Syu
+elif [ -x "$apt" ]; then
+    sudo "$apt" update && sudo "$apt" upgrade
+fi
+
+sudo -k
+
+# vim: ft=sh:
