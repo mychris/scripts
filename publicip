@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
 # - publicip
 
-wget -q -O - checkip.dyndns.org |sed -e 's/.*Current IP Address: //' -e 's/<.*$//'
+dig +short @resolver1.opendns.com myip.opendns.com
 
