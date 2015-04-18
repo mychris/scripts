@@ -1,0 +1,22 @@
+#!/usr/bin/env sh
+
+function usage() {
+    echo "Usage: mergepdf [OPTIONS]... FILES...
+
+Creates a new PDF by merging the given PDF files into a single one.
+
+  -o  name of the new PDF
+  -h  display this help and exit"
+}
+
+outname="merged.pdf"
+
+while getopts h OPT; do
+    case "$OPT" in
+        o) outname=$OPTARG ;;
+        h) usage ; exit 0 ;;
+        \?) usage ; exit 1 ;;
+    esac
+done
+
+gs -dBATCH -dNOPAUSE -q -sDEVICE=pdfwrite -sOutputFile="$outname" "$@"
