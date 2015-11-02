@@ -1,5 +1,13 @@
 #!/usr/bin/env sh
 # - publicip
 
-dig +short @resolver1.opendns.com myip.opendns.com
+if [ $(command -v dig) ]; then
+  dig +short @resolver1.opendns.com myip.opendns.com
+elif [ $(command -v curl) ]; then
+  curl -s http://checkip.dyndns.org/ | grep --color=never -o "[[:digit:].]\+"
+elif [ $(command -v wget) ]; then
+  wget -q -O- http://checkip.dyndns.org | grep --color=never -o "[[:digit:].]\+"
+fi
+exit $?
 
+# vim: ft=sh ts=2 sts=2 sw=2 et:
