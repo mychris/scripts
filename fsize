@@ -1,4 +1,4 @@
-#/usr/bin/env sh
+#!/bin/sh
 
 if [ -z "${1+x}" ]; then
   size="12"
@@ -18,3 +18,5 @@ else
 fi
 
 printf '\33]50;%s%s%s%d\007' "xft:Inconsolata:" "${face}" ":autohint=true:antialias=true:pixelsize=" "${size}"
+
+# vim: ft=sh ts=2 sts=2 sw=2 et:

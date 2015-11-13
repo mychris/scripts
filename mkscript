@@ -1,6 +1,14 @@
-#!/usr/bin/env sh
+#!/bin/sh
 
-function usage() {
+# exit if command fails
+set -e
+# sane behaviour for cd
+unset CDPATH
+# set IFS to SP HT LF.
+IFS=' 	
+'
+
+usage () {
   echo "Usage: $(basename "$0") [OPTIONS]... FILE
 
 Creates a new script file and adds a header to the file according to the file \
@@ -9,6 +17,7 @@ If a template.\"type\" exists in ~/Templates, the content of this file will be \
 used as content for the new created script file.
 Makes the script file executeable.
 
+options:
   -t <type>   type of the script file, must be the file extension
   -n          make the created file NOT executeable
   -h          display this help and exit"
@@ -64,14 +73,14 @@ else
       ;;
 
     sh)
-      echo '#!/usr/bin/env sh' >> "$filename"
+      echo '#!/bin/sh' >> "$filename"
       echo >> "$filename"
       echo >> "$filename"
       echo '# vim: ft=sh ts=2 sts=2 sw=2 et:' >> "$filename"
       ;;
 
     bash)
-      echo '#!/usr/bin/env bash' >> "$filename"
+      echo '#!/bin/bash' >> "$filename"
       echo >> "$filename"
       echo >> "$filename"
       echo '# vim: ft=sh ts=2 sts=2 sw=2 et:' >> "$filename"

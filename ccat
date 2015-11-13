@@ -1,21 +1,52 @@
-#!/usr/bin/env sh
+#!/bin/sh
 
-if ! `which pygmentize &>/dev/null`; then
-    echo "pygmentize not found"
-    echo "easy_install it"
-    exit 1
+# exit if command fails
+set -e
+# sane behaviour for cd
+unset CDPATH
+# set IFS to SP HT LF.
+IFS=' 	
+'
+
+usage () {
+  echo "usage: $(basename "$0") [OPTION]... FILE"
+  echo ""
+  echo " -h   display this help and exit"
+}
+
+while getopts "h" opt; do
+  case "$opt" in
+    h)
+      usage
+      exit 0
+      ;;
+    \?)
+      usage
+      exit 1
+      ;;
+  esac
+done
+
+shift $((OPTIND-1))
+
+file="$1"
+
+if ! `which pygmentize >/dev/null 2>&1`; then
+  echo "pygmentize not found"
+  echo "easy_install it"
+  exit 127
 fi
 
-if [ ! -t 0 ]; then
-    file=/dev/stdin
-elif [ -f $1 ]; then
-    file=$1
-else
-    echo "Usage: ccat code.c"
-    echo "or e.g. head code.c | ccat"
-    exit 2
+if [ -z "$file" ]; then
+  file=/dev/stdin
+elif [ ! -e $1 ]; then
+  echo "$(basename "$0"): ${file}: No such file or directory"
+  exit 2
+elif [ -d "$file" ]; then
+  echo "$(basename "$0"): ${file}: Is a directory "
+  exit 2
 fi
 
 pygmentize -f terminal -g $file
 
-# vim: ft=sh:
+# vim: ft=sh ts=2 sts=2 sw=2 et:
