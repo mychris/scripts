@@ -1,33 +1,50 @@
-#!/usr/bin/env sh
+#!/bin/sh
+
+# sane behaviour for cd
+unset CDPATH
+# set IFS to SP HT LF.
+IFS=' 	
+'
 
 usage () {
-    echo "Usage: $(basename "$0") [OPTIONS]... FILES...
+  cat << EOF
+usage: `basename "$0"` [OPTIONS]... FILES...
 
 Creates a new PDF by merging the given PDF files into a single one.
 
+options:
   -o <name>   name of the new PDF, defaults to 'merged.pdf'
-  -h          display this help and exit"
+  -h          display this help and exit
+EOF
 }
 
 outname="merged.pdf"
 
 while getopts "o:h" opt; do
-    case "$opt" in
-        o)
-            outname="$OPTARG"
-            ;;
-        h)
-            usage
-            exit 0
-            ;;
-        \?)
-            usage
-            exit 1
-            ;;
-    esac
+  case "$opt" in
+    o)
+      outname="$OPTARG"
+      ;;
+    h)
+      usage
+      exit 0
+      ;;
+    \?)
+      usage
+      exit 1
+      ;;
+  esac
 done
 
 shift $((OPTIND-1))
 
-gs -dBATCH -dNOPAUSE -q -sDEVICE=pdfwrite -sOutputFile="$outname" "$@"
-exit $?
+if [ $# -eq 0 ]; then
+  printf "No files given.\n\n"
+  usage
+  exit 3
+else
+  gs -dBATCH -dNOPAUSE -q -sDEVICE=pdfwrite -sOutputFile="$outname" "$@"
+  exit $?
+fi
+
+# vim: ft=sh ts=2 sts=2 sw=2 et:
