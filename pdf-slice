@@ -1,0 +1,105 @@
+#!/bin/sh
+
+# sane behaviour for cd
+unset CDPATH
+# set IFS to SP HT LF.
+IFS=' 	
+'
+
+usage () {
+  cat << EOF
+usage: `basename "$0"` [OPTIONS]... INPUT_FILE SLICE
+
+Creates a new PDF by slicing the given PDF file.
+
+SLICE can have the form [<first-page>:<last-page>[.
+The default is [ for <first-page>
+               ] for <second-page>
+(both included)
+
+options:
+  -o <name>   name of the new PDF, defaults to 'sliced.pdf'
+  -h          display this help and exit
+EOF
+}
+
+number_of_pages () {
+  gs -q -dNODISPLAY -c "($1) (r) file runpdfbegin pdfpagecount = quit"
+}
+
+outname="sliced.pdf"
+
+while getopts "o:h" opt; do
+  case "$opt" in
+    o)
+      outname="$OPTARG"
+      ;;
+    h)
+      usage
+      exit 0
+      ;;
+    \?)
+      usage
+      exit 1
+      ;;
+  esac
+done
+
+shift $((OPTIND-1))
+
+if test "$#" -lt 2; then
+  printf "Not enough arguments given.\n\n"
+  usage
+  exit 3
+fi
+
+input="$1"
+slice="$2"
+
+if test ! -f "$input"; then
+  printf "Given INPUT_FILE <%s> is not a file.\n" "$input"
+  exit 4
+fi
+
+if test ! -r "$input"; then
+  printf "Given INPUT_FILE <%s> is not readable.\n" "$input"
+  exit 4
+fi
+
+if ! echo "$slice" |grep -P '^[\[\]]?\d*:\d*[\[\]]?$' >/dev/null; then
+  printf "Given SLICE <%s> is not valid.\n" "$slice"
+  exit 4
+fi
+
+slice_start=`echo "$slice" |sed 's/\:.*//'`
+slice_end=`echo "$slice" |sed 's/.*\://'`
+
+case "$slice_start" in
+  "]")    slice_start="2" ;;
+  "["|"") slice_start="1" ;;
+  "]"*)   slice_start=`expr "${slice_start#]}" + 1` ;;
+  "["*|*) slice_start="${slice_start#[}" ;;
+esac
+
+case "$slice_end" in
+  "]"|"") slice_end=`number_of_pages "$input"` ;;
+  "[")    slice_end=$(expr $(number_of_pages "$input") - 1) ;;
+  *"[")   slice_end=`expr "${slice_end%[}" - 1` ;;
+  *"]"|*) slice_end="${slice_end%]}" ;;
+esac
+
+if test "$slice_start" -gt "$slice_end"; then
+  printf "Given SLICE <%s> is not valid.\n" "$slice"
+  exit 5
+fi
+
+gs \
+  -dBATCH \
+  -dNOPAUSE -q -sDEVICE=pdfwrite \
+  -sOutputFile="$outname" \
+  -dFirstPage="$slice_start" \
+  -dLastPage="$slice_end" \
+  "$input"
+exit $?
+
+# vim: ft=sh ts=2 sts=2 sw=2 et:
