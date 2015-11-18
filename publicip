@@ -1,14 +1,23 @@
 #!/usr/bin/env sh
 
-usage ()
-{
-  echo "Usage: $(basename "$0") [OPTIONS]...
+# exit if command fails
+set -e
+# sane behaviour for cd
+unset CDPATH
+# set IFS to SP HT LF.
+IFS=' 	
+'
 
-Prints the public IP-Address.
+usage () {
+  cat << EOF
+usage: `basename "$0"` [OPTIONS]...
+
+Display the public IP-Address.
 
 Options:
   -v    verbose output
   -h    display this help and exit"
+EOF
 }
 
 verbose=0
@@ -31,15 +40,18 @@ done
 
 shift $((OPTIND-1))
 
-if [ $(command -v dig) ]; then
+if command -v dig >/dev/null 2>&1; then
   [ "$verbose" -eq 1 ] && set -o xtrace
   dig +short @resolver1.opendns.com myip.opendns.com
-elif [ $(command -v curl) ]; then
+elif command -v curl >/dev/null 2>&1; then
   [ "$verbose" -eq 1 ] && set -o xtrace
   curl -s "http://checkip.dyndns.org" | grep --color=never -o "[[:digit:].]\+"
-elif [ $(command -v wget) ]; then
+elif command -v wget >/dev/null 2>&1; then
   [ "$verbose" -eq 1 ] && set -o xtrace
   wget -q -O- "http://checkip.dyndns.org" | grep --color=never -o "[[:digit:].]\+"
+else
+  printf "No suitable ommand found.\n\n"
+  exit 120
 fi
 
 # vim: ft=sh ts=2 sts=2 sw=2 et:
