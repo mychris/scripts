@@ -1,0 +1,60 @@
+#!/bin/sh
+
+# exit if command fails.
+set -e
+# protect the script from unexpected cd behaviour.
+unset CDPATH
+# set IFS to SP HT LF.
+IFS=' 	
+'
+
+usage() {
+  cat << EOF
+usage: $(basename "$0") [OPTION]... [FILE]
+
+Creates a screenshot from the connected android device
+and copies the file to the cwd
+
+If FILE is not specified, a date-stamped filename will be used.
+options:
+  -h     display this help message and exit
+EOF
+}
+
+while getopts "h" opt; do
+  case $opt in
+    h)
+      usage
+      exit 0
+      ;;
+    \?)
+      usage
+      exit 2
+      ;;
+  esac
+done
+
+shift $((OPTIND-1))
+
+path="${1:-android_screenshot_$(date '+%Y-%m-%d_%k:%m:%S_%s').png}"
+file="$(basename "$path")"
+
+if [ ! -e "$(dirname "$path")" ]; then
+  mkdir -p "$(dirname "$path")"
+fi
+
+adb start-server
+if ! timeout --foreground 5 adb wait-for-device; then
+  printf "No device found\n"
+  exit 3
+fi
+
+adb shell screencap -p "/sdcard/${file}"
+adb pull "/sdcard/${file}"
+adb shell rm "/sdcard/${file}"
+
+if [ "$(dirname "$path")" != "." ]; then
+  mv "$file" "$(dirname "$path")"
+fi
+
+# vim: ft=sh ts=2 sts=2 sw=2 et:

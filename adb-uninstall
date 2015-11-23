@@ -1,0 +1,85 @@
+#!/bin/sh
+
+# exit if command fails.
+set -e
+# protect the script from unexpected cd behaviour.
+unset CDPATH
+# set IFS to SP HT LF.
+IFS=' 	
+'
+
+usage() {
+  cat << EOF
+usage: $(basename "$0") [OPTION]... PATTERN
+
+Uninstall all packages matching PATTERN
+
+options:
+  -f     force uninstall, do not ask
+  -h     display this help message and exit
+EOF
+}
+
+uninstall() {
+  printf "uninstalling %s\n" "$1"
+  adb uninstall "$1"
+}
+
+force="false"
+pattern=""
+
+while getopts "fh" opt; do
+  case $opt in
+    f)
+      force="true"
+      ;;
+    h)
+      usage
+      exit 0
+      ;;
+    /?)
+      usage
+      exit 2
+      ;;
+  esac
+done
+
+shift $((OPTIND-1))
+
+pattern="$1"
+if test -z "$pattern"; then
+  printf "No pattern given\n\n"
+  usage
+  exit 2
+fi
+
+adb start-server
+if ! timeout --foreground 5 adb wait-for-device; then
+  printf "No device found\n"
+  exit 100
+fi
+
+packages=$(adb shell pm list packages -f |\
+  sed -e 's/[^[:print:]]$//' |\
+  awk 'BEGIN { FS="="} $2 ~ /'"$pattern"'/ { print $2 }')
+
+if test -z "$packages"; then
+  printf "No packages found matching <%s>\n" "$pattern"
+  exit 200
+fi
+
+for package in $packages; do
+  choice="yes"
+  if test ! "$force" = "true"; then
+    printf "%s: uninstall %s ? " "$(basename "$0")" "$package"
+    read -r choice
+    choice=$(echo "$choice" |tr '[:upper:]' '[:lower:]')
+  fi
+  case "$choice" in
+    y|ye|yes)
+      uninstall "$package"
+      ;;
+  esac
+done
+
+# vim: ft=sh ts=2 sts=2 sw=2 et:
