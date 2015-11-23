@@ -34,11 +34,11 @@ while getopts "fh" opt; do
       force="true"
       ;;
     h)
-      usage
+      usage >&1
       exit 0
       ;;
     /?)
-      usage
+      usage >&2
       exit 2
       ;;
   esac
@@ -48,14 +48,14 @@ shift $((OPTIND-1))
 
 pattern="$1"
 if test -z "$pattern"; then
-  printf "No pattern given\n\n"
+  printf "No pattern given\n\n" >&2
   usage
   exit 2
 fi
 
 adb start-server
 if ! timeout --foreground 5 adb wait-for-device; then
-  printf "No device found\n"
+  printf "No device found\n" >&2
   exit 100
 fi
 
@@ -64,7 +64,7 @@ packages=$(adb shell pm list packages -f |\
   awk 'BEGIN { FS="="} $2 ~ /'"$pattern"'/ { print $2 }')
 
 if test -z "$packages"; then
-  printf "No packages found matching <%s>\n" "$pattern"
+  printf "No packages found matching <%s>\n" "$pattern" >&2
   exit 200
 fi
 
