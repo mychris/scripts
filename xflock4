@@ -1,12 +1,21 @@
 #!/bin/sh
 
-if [ $(command -v i3lock) ]; then
-    pic=`cat $HOME/.fehbg |sed -e "s/feh\s*--bg-[a-z]*//" -e "s/^\s*'//" -e "s/'\s*$//"`
-    exec i3lock -i "$pic"
+# exit if command fails
+set -e
+# sane behaviour for cd
+unset CDPATH
+# set IFS to SP HT LF.
+IFS=' 	
+'
+
+if which i3lock >/dev/null 2>&1; then
+  pic=$(sed -e "s/feh\s*--bg-[a-z]*//" -e "s/^\s*'//" -e "s/'\s*$//" "${HOME}/.fehbg")
+  exec i3lock -i "$pic" -t
 else
-    real=$(which -a xflock4 |awk 'NR==2 {print}')
-    if [ ! -z "${real+x}" ]; then
-        exec $($real)
-    fi
+  real=$(which -a xflock4 |awk 'NR==2 {print}')
+  if [ ! -z "${real+x}" ]; then
+    exec "$real"
+  fi
 fi
 
+# vim: ft=sh ts=2 sts=2 sw=2 et:
