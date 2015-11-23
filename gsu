@@ -1,24 +1,30 @@
 #!/usr/bin/env bash
 
+# sane behaviour for cd
+unset CDPATH
+# set IFS to SP HT LF.
+IFS=' 	
+'
+
 if [ ! -d ".git" ]; then
-    echo "not the root of a git repository"
-    exit 1
+  echo "not the root of a git repository"
+  exit 1
 fi
-  
-cur=`pwd`
+
+cur=$(pwd)
 echo "found $(git submodule status | wc -l) submodules"
 
 while read submodule; do
-    s=(${submodule// / })
-    if [ -n "${s[1]}" ]; then
-        cd "${s[1]}"
+  s=(${submodule// / })
+  if [ -n "${s[1]}" ]; then
+    cd "${s[1]}"
 
-        echo -e "\e[0;34mchecking '\e[0;33m${s[1]}\e[034m'\e[0m"
-        git checkout master
-        git pull
+    echo -e "\e[0;34mchecking '\e[0;33m${s[1]}\e[034m'\e[0m"
+    git checkout master
+    git pull
 
-        cd "$cur"
-    fi
+    cd "$cur"
+  fi
 done <<< "$(git submodule status)"
 
-# vim: ft=sh:
+# vim: ft=sh ts=2 sts=2 sw=2 et:

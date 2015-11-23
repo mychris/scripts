@@ -1,8 +1,12 @@
-#!/usr/bin/env sh
+#!/bin/sh
 
-NAME="sxhkd"
-PID=`pidof $NAME`
+name="sxhkd"
+pid=$(pidof "$name")
+if test "$?" -ne 0; then
+  printf "%s not running\n" "$name" >&2
+  exit 1
+fi
 
-[[ $? != 0 ]] && printf "$NAME not running\n" && exit 1
+kill -s 10 "$pid"
 
-kill -s 10 $PID
+# vim: ft=sh ts=2 sts=2 sw=2 et:

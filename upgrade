@@ -1,16 +1,21 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
-sudo -k
+# exit if command fails
+set -e
+# sane behaviour for cd
+unset CDPATH
+# set IFS to SP HT LF.
+IFS=' 	
+'
 
-pac=`which pacman`
-apt=`which apt-get`
-
-if [ -x "$pac" ]; then
-    sudo $pac -Syu
-elif [ -x "$apt" ]; then
-    sudo "$apt" update && sudo "$apt" upgrade
+if test "$(id -u)" -ne 0; then
+  printf "not running as root.\n" >&2
 fi
 
-sudo -k
+if which pacman >/dev/null 2>&1; then
+  pacman -Syu
+elif which apt-get >/dev/null 2>&1; then
+  apt-get update && apt-get upgrade
+fi
 
-# vim: ft=sh:
+# vim: ft=sh ts=2 sts=2 sw=2 et:

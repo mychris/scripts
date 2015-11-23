@@ -8,7 +8,7 @@ IFS='
 
 usage () {
   cat << EOF
-usage: `basename "$0"` [OPTIONS]... FILES...
+usage: $(basename "$0") [OPTIONS]... FILES...
 
 Creates a new PDF by merging the given PDF files into a single one.
 
@@ -26,11 +26,11 @@ while getopts "o:h" opt; do
       outname="$OPTARG"
       ;;
     h)
-      usage
+      usage >&1
       exit 0
       ;;
     \?)
-      usage
+      usage >&2
       exit 1
       ;;
   esac
@@ -39,8 +39,8 @@ done
 shift $((OPTIND-1))
 
 if [ $# -eq 0 ]; then
-  printf "No files given.\n\n"
-  usage
+  printf "No files given.\n\n" >&2
+  usage >&2
   exit 3
 else
   gs -dBATCH -dNOPAUSE -q -sDEVICE=pdfwrite -sOutputFile="$outname" "$@"

@@ -8,7 +8,7 @@ IFS='
 
 usage () {
   cat << EOF
-usage: `basename "$0"` [OPTIONS]... INPUT_FILE SLICE
+usage: $(basename "$0") [OPTIONS]... INPUT_FILE SLICE
 
 Creates a new PDF by slicing the given PDF file.
 
@@ -35,11 +35,11 @@ while getopts "o:h" opt; do
       outname="$OPTARG"
       ;;
     h)
-      usage
+      usage >&1
       exit 0
       ;;
     \?)
-      usage
+      usage >&2
       exit 1
       ;;
   esac
@@ -48,8 +48,8 @@ done
 shift $((OPTIND-1))
 
 if test "$#" -lt 2; then
-  printf "Not enough arguments given.\n\n"
-  usage
+  printf "Not enough arguments given.\n\n" >&2
+  usage >&2
   exit 3
 fi
 
@@ -57,17 +57,17 @@ input="$1"
 slice="$2"
 
 if test ! -f "$input"; then
-  printf "Given INPUT_FILE <%s> is not a file.\n" "$input"
+  printf "Given INPUT_FILE <%s> is not a file.\n" "$input" >&2
   exit 4
 fi
 
 if test ! -r "$input"; then
-  printf "Given INPUT_FILE <%s> is not readable.\n" "$input"
+  printf "Given INPUT_FILE <%s> is not readable.\n" "$input" >&2
   exit 4
 fi
 
 if ! echo "$slice" |grep -P '^[\[\]]?\d*:\d*[\[\]]?$' >/dev/null; then
-  printf "Given SLICE <%s> is not valid.\n" "$slice"
+  printf "Given SLICE <%s> is not valid.\n" "$slice" >&2
   exit 4
 fi
 
@@ -89,7 +89,7 @@ case "$slice_end" in
 esac
 
 if test "$slice_start" -gt "$slice_end"; then
-  printf "Given SLICE <%s> is not valid.\n" "$slice"
+  printf "Given SLICE <%s> is not valid.\n" "$slice" >&2
   exit 5
 fi
 

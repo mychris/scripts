@@ -1,31 +1,31 @@
-#!/usr/bin/env sh
+#!/bin/sh
 #
 # Prezi key bindings for the Logitech R400 Wireless Presenter
 #
 
-
 prezi_start() {
-    echo 'Bound keys for prezi presentation'
-    echo '112 = Left, 117 = Right'
-    xmodmap -e "keycode 112 = Left" -e "keycode 117 = Right"
+  echo 'Bound keys for prezi presentation'
+  echo '112 = Left, 117 = Right'
+  xmodmap -e "keycode 112 = Left" -e "keycode 117 = Right"
 }
 
 prezi_stop() {
-    echo 'Bound keys back to normal'
-    echo '112 = Prior, 117 = Next'
-    xmodmap -e "keycode 112 = Prior" -e "keycode 117 = Next"
+  echo 'Bound keys back to normal'
+  echo '112 = Prior, 117 = Next'
+  xmodmap -e "keycode 112 = Prior" -e "keycode 117 = Next"
 }
 
-if [ "z$1" = "zon" -o "z$1" = "zstart" ]; then
-    prezi_start
-elif [ "z$1" = "zoff" -o "z$1" = "zstop" ]; then
-    prezi_stop
+if [ "$1" = "on" -o "$1" = "start" ]; then
+  prezi_start
+elif [ "$1" = "off" -o "$1" = "stop" ]; then
+  prezi_stop
 else
-    key112=`xmodmap -pk | grep 112 | grep Prior`
-    if [ "z$key112" = "z" ]; then
-        prezi_stop
-    else
-        prezi_start
-    fi
+  key112=$(xmodmap -pk | grep 112 | grep Prior)
+  if [ "z$key112" = "z" ]; then
+    prezi_stop
+  else
+    prezi_start
+  fi
 fi
 
+# vim: ft=sh ts=2 sts=2 sw=2 et:
