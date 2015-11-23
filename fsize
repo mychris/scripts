@@ -1,5 +1,54 @@
 #!/bin/sh
 
+# exit if command fails
+set -e
+# sane behaviour for cd
+unset CDPATH
+# set IFS to SP HT LF.
+IFS=' 	
+'
+
+usage () {
+  cat << EOF
+usage: $(basename "$0") [OPTIONS].. [SIZE] [FACE]
+
+Change the font of the current terminal to SIZE and FACE.
+SIZE default: 12
+FACE default: medium
+
+FACE:
+  - bold
+  - italic
+  - bolditalic or italicbold
+
+options:
+  -h    display this help and exit.
+EOF
+}
+
+while getopts "h" opt; do
+  case "$opt" in
+    h)
+      usage >&1
+      exit 0
+      ;;
+    \?)
+      usage >&2
+      exit 1
+      ;;
+  esac
+done
+
+shift $((OPTIND-1))
+
+if [ ! -t 1 ]; then
+  printf "stdin: is not a tty\n" >&2
+fi
+
+if [ "$SHELL" != "$(which bash)" ]; then
+  printf "stdin: is not bash\n" >&2
+fi
+
 if [ -z "${1+x}" ]; then
   size="12"
 else
@@ -7,16 +56,16 @@ else
 fi
 
 if [ -z "${2+x}" ]; then
-    face="medium"
+  face="medium"
 else
-    case $2 in
-        bold) face="bold" ;;
-        italic) face="italic" ;;
-        bolditalic) face="bold:italic" ;;
-        *) face="medium" ;;
-    esac
+  case "$2" in
+    bold) face="bold" ;;
+    italic) face="italic" ;;
+    bolditalic|italicbold) face="bold:italic" ;;
+    *) face="medium" ;;
+  esac
 fi
 
-printf '\33]50;%s%s%s%d\007' "xft:Inconsolata:" "${face}" ":autohint=true:antialias=true:pixelsize=" "${size}"
+printf '\33]50;%s:%s:%s%d\007' "xft:Inconsolata" "${face}" "autohint=true:antialias=true:pixelsize=" "${size}"
 
 # vim: ft=sh ts=2 sts=2 sw=2 et:

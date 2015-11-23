@@ -9,19 +9,22 @@ IFS='
 '
 
 usage () {
-  echo "usage: $(basename "$0") [OPTION]... FILE"
-  echo ""
-  echo " -h   display this help and exit"
+  cat << EOF
+usage: $(basename "$0") [OPTION]... FILE
+
+options:
+  -h    display this help and exit
+EOF
 }
 
 while getopts "h" opt; do
   case "$opt" in
     h)
-      usage
+      usage >&1
       exit 0
       ;;
     \?)
-      usage
+      usage >&2
       exit 1
       ;;
   esac
@@ -31,19 +34,18 @@ shift $((OPTIND-1))
 
 file="$1"
 
-if ! `which pygmentize >/dev/null 2>&1`; then
-  echo "pygmentize not found"
-  echo "easy_install it"
+if ! which pygmentize >/dev/null 2>&1; then
+  printf "pygmentize not found.\neasy_install it.\n" >&2
   exit 127
 fi
 
 if [ -z "$file" ]; then
   file=/dev/stdin
-elif [ ! -e $1 ]; then
-  echo "$(basename "$0"): ${file}: No such file or directory"
+elif [ ! -e "$1" ]; then
+  printf "%s: %s: No such file or directory" "$(basename "$0")" "$file" >&2
   exit 2
 elif [ -d "$file" ]; then
-  echo "$(basename "$0"): ${file}: Is a directory "
+  printf "%s: %s: Is a directory" "$(basename "$0")" "$file" >&2
   exit 2
 fi
 

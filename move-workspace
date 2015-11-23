@@ -1,5 +1,5 @@
-#!/usr/bin/env sh
-
-
+#!/bin/sh
 
 i3-msg move workspace to output "$1"
+
+# vim: ft=sh ts=2 sts=2 sw=2 et:
