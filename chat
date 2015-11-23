@@ -1,10 +1,13 @@
 #!/usr/bin/env bash
 
-command -v weechat-curses >/dev/null 2>&1 || { echo >&2 "weechat-curses not found"; exit 1; }
+if ! which weechat-curses >/dev/null 2>&1; then
+    printf "weechat-curses not found\n" >&2
+    exit 1
+fi
 
 tmux_session_name="chat"
 tmux_window_name="weechat"
-weechat_command=`which weechat-curses`
+weechat_command=$(which weechat-curses)
 
 if tmux has-session -t "$tmux_session_name" &>/dev/null ; then
     tmux attach-session -t $tmux_session_name \; select-window -t $tmux_window_name

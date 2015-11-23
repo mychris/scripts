@@ -4,14 +4,14 @@
 #
 
 prezi_start() {
-  echo 'Bound keys for prezi presentation'
-  echo '112 = Left, 117 = Right'
+  printf "Bound keys for prezi presentation\n"
+  printf "112 = Left, 117 = Right"
   xmodmap -e "keycode 112 = Left" -e "keycode 117 = Right"
 }
 
 prezi_stop() {
-  echo 'Bound keys back to normal'
-  echo '112 = Prior, 117 = Next'
+  printf "Bound keys back to normal"
+  printf "112 = Prior, 117 = Next"
   xmodmap -e "keycode 112 = Prior" -e "keycode 117 = Next"
 }
 

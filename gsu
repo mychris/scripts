@@ -7,12 +7,12 @@ IFS='
 '
 
 if [ ! -d ".git" ]; then
-  echo "not the root of a git repository"
+  printf "not the root of a git repository\n"
   exit 1
 fi
 
 cur=$(pwd)
-echo "found $(git submodule status | wc -l) submodules"
+printf "found %s submodules" "$(git submodule status | wc -l)\n"
 
 while read submodule; do
   s=(${submodule// / })

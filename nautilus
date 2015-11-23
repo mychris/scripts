@@ -23,7 +23,7 @@ elif [ $(command -v i3-sensible-terminal) ]; then
         exec i3-sensible-terminal -e mc "$file"
     fi
 else
-    echo "No applicable program found"
+    printf "No applicable program found\n"
     exit 1
 fi
 

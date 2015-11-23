@@ -66,13 +66,13 @@ if test ! -r "$input"; then
   exit 4
 fi
 
-if ! echo "$slice" |grep -P '^[\[\]]?\d*:\d*[\[\]]?$' >/dev/null; then
+if ! printf '%s' "$slice" |grep -P '^[\[\]]?\d*:\d*[\[\]]?$' >/dev/null; then
   printf "Given SLICE <%s> is not valid.\n" "$slice" >&2
   exit 4
 fi
 
-slice_start=`echo "$slice" |sed 's/\:.*//'`
-slice_end=`echo "$slice" |sed 's/.*\://'`
+slice_start=$(printf '%s' "$slice" |sed 's/\:.*//')
+slice_end=$(printf '%s' "$slice" |sed 's/.*\://')
 
 case "$slice_start" in
   "]")    slice_start="2" ;;

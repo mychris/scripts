@@ -73,7 +73,7 @@ for package in $packages; do
   if test ! "$force" = "true"; then
     printf "%s: uninstall %s ? " "$(basename "$0")" "$package"
     read -r choice
-    choice=$(echo "$choice" |tr '[:upper:]' '[:lower:]')
+    choice=$(printf '%s' "$choice" |tr '[:upper:]' '[:lower:]')
   fi
   case "$choice" in
     y|ye|yes)
