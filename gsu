@@ -7,19 +7,19 @@ IFS='
 '
 
 if [ ! -d ".git" ]; then
-  printf "not the root of a git repository\n"
+  printf "not the root of a git repository\n" >&2
   exit 1
 fi
 
 cur=$(pwd)
-printf "found %s submodules" "$(git submodule status | wc -l)\n"
+printf "found %s submodules\n" "$(git submodule status | wc -l)"
 
 while read submodule; do
   s=(${submodule// / })
   if [ -n "${s[1]}" ]; then
     cd "${s[1]}"
 
-    echo -e "\e[0;34mchecking '\e[0;33m${s[1]}\e[034m'\e[0m"
+    printf "\e[0;34mchecking '\e[0;33m%s\e[034m'\e[0m\n" "${s[1]}"
     git checkout master
     git pull
 
