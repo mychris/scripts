@@ -1,14 +1,28 @@
 #!/bin/sh
 
-tmp=${TMPDIR-/tmp}/pacman-disowned-$UID-$$
+# exit if command fails
+set -e
+# sane behaviour for cd
+unset CDPATH
+# set IFS to SP HT LF.
+IFS=' 	
+'
+
+cleanup () {
+  rm -rf "$tmp"
+}
+
+tmp=$(mktemp -d -t "$(basename "$0")-XXX")
 db=$tmp/db
 fs=$tmp/fs
 
-mkdir "$tmp"
-trap 'rm -rf "$tmp"' EXIT
+trap 'cleanup' EXIT
+trap 'cleanup ; exit 130' 2
 
 pacman -Qlq | sort -u > "$db"
 
 find /etc /opt /usr ! -name lost+found \( -type d -printf '%p/\n' -o -print \) | sort > "$fs"
 
 comm -23 "$fs" "$db"
+
+# vim: ft=sh ts=2 sts=2 sw=2 et:
