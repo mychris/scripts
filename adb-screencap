@@ -37,10 +37,14 @@ done
 shift $((OPTIND-1))
 
 path="${1:-android_screenshot_$(date '+%Y-%m-%d_%k:%m:%S_%s').png}"
+if [ -d "$path" ]; then
+  path="${path}/android_screenshot_$(date '+%Y-%m-%d_%k:%m:%S_%s').png"
+fi
 file="$(basename "$path")"
 
 if [ ! -e "$(dirname "$path")" ]; then
-  mkdir -p "$(dirname "$path")"
+  printf "'%s': No such file or directory\n" "$path" >&2
+  exit 1
 fi
 
 adb start-server
