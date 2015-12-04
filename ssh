@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/bin/sh
 
 if [ -x "/usr/bin/envoy-exec" ]; then
     exec "/usr/bin/envoy-exec" "/usr/bin/ssh" "$@"
