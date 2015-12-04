@@ -18,6 +18,7 @@ Default number of COLS is 4.
 By default, only hexadecimal indices are displayed.
 
 options:
+  -8    include the ISO Latin-1 characters (0x80 - 0xFF)
   -d    display deicmal indices
   -x    display hexadecimal indices
   -o    display octal indices
@@ -25,11 +26,12 @@ options:
 EOF
 }
 
-while getopts "odxh" opt; do
+while getopts "odx8h" opt; do
   case "$opt" in
     o) oct=y ;;
     d) dec=y ;;
     x) hex=y ;;
+    8) iso=y ;;
     h) usage ; exit 0 ;;
     \?) usage >&2 ; exit 1 ;;
   esac
@@ -48,12 +50,14 @@ fi
 
 awk '
 BEGIN {
-  cols = int("'"${1:-4}"'")
-  rows = int(127 / cols) + 1
-
   oct = "'"${oct:-n}"'" == "y"
   dec = "'"${dec:-n}"'" == "y"
   hex = "'"${hex:-n}"'" == "y"
+
+  max = ("'"${iso:-n}"'" == "y") ? 255 : 127
+
+  cols = int("'"${1:-4}"'")
+  rows = int(max / cols) + 1
 
   cnt = 0 + oct + hex + dec
 
@@ -73,19 +77,24 @@ BEGIN {
   split(ab,abr,",")
   abr[0] = "NUL"
   abr[127] = "DEL"
+  for (i = 128; i <= 160; i++) {
+    abr[i] = sprintf("x%X", i);
+  }
+  abr[160] = "NSP"
+  abr[173] = "SHY"
 
   # print table
   fm1 = sprintf("| %s%s%s%%-3s ", (dec)?"%03d ":"", (hex)?"%02X ":"", (oct)?"%03o ":"")
   for (row = 0; row < rows; row++) {
     for (col = 0; col < cols; col++) {
       idx = row + (col * rows)
-      if (idx <= 127) {
+      if (idx <= max) {
         if (cnt == 1) {
-          printf(fm1, idx, (idx in abr) ? abr[idx] : sprintf("%c",idx))
+          printf(fm1, idx, (idx in abr) ? abr[idx] : sprintf(" %c",idx))
         } else if (cnt == 2) {
-          printf(fm1, idx, idx, (idx in abr) ? abr[idx] : sprintf("%c",idx))
+          printf(fm1, idx, idx, (idx in abr) ? abr[idx] : sprintf(" %c",idx))
         } else {
-          printf(fm1, idx, idx, idx, (idx in abr) ? abr[idx] : sprintf("%c",idx))
+          printf(fm1, idx, idx, idx, (idx in abr) ? abr[idx] : sprintf(" %c",idx))
         }
       }
     }
