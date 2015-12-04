@@ -1,25 +1,57 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# pylint: disable=invalid-name
+#!/bin/sh
 
-import shlex
-import sys
+# exit if command fails
+set -e
+# set IFS to SP HT LF.
+IFS=' 	
+'
 
-seconds = int(float(shlex.split(open('/proc/uptime', 'r').readlines()[0])[0]))
+usage () {
+  cat << EOF
+usage: $(basename "$0") [OPTIONS]... FILE
 
-if seconds < 60:
-  sys.stdout.write('%02d Sec' % (seconds))
-elif seconds < 60 * 60:
-  sys.stdout.write('%02d Min' % (seconds / 60))
-else:
-  mins = int(seconds / 60 % 60)
-  hours = int(seconds / 60 / 60 % 24)
-  days = int(seconds / 60 / 60 / 24)
-  day_string = 'Days' if days > 1 else 'Day'
+Reads FILE (which must have the format of /proc/uptime)
+and displays the uptime in a human readable way.
 
-  if days > 0:
-    sys.stdout.write('%d %s %02d:%02d\n' % (days, day_string, hours, mins))
-  else:
-    sys.stdout.write('%02d:%02d\n' % (hours, mins))
+If FILE is '-', STDIN is used.
+By default, /proc/uptime is used as FILE.
 
-# vim: ft=python ts=2 sts=2 sw=2 et:
+options:
+  -h          display this help and exit
+EOF
+}
+
+while getopts "h" opt; do
+  case "$opt" in
+    h) usage >&1 ; exit 0 ;;
+    \?) usage >&2 ; exit 1 ;;
+  esac
+done
+
+shift $((OPTIND-1))
+
+awk '
+BEGIN {
+  FS=" "
+}
+NR == 1 {
+  secs = int($1)
+  if (secs < 60) {
+    printf("%02d Sec\n", secs );
+  } else if (secs < (60 * 60)) {
+    printf("%02d Min\n", (secs / 60));
+  } else {
+    mins = int(secs / 60 % 60)
+    hours = int(secs / 60 / 60 % 24)
+    days = int(secs / 60 / 60 / 24)
+    if (days > 0) {
+      printf("%d %s %02d:%02d\n", days, (days > 1) ? "Days" : "day", hours, mins)
+    } else {
+      printf("%02d:%02d\n", hours, mins)
+    }
+  }
+  exit
+}
+' "${1:-/proc/uptime}"
+
+# vim: ft=sh ts=2 sts=2 sw=2 et:
