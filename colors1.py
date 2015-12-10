@@ -7,11 +7,6 @@ import os
 import sys
 
 if __name__ == "__main__":
-    try:
-        range = xrange
-    except:
-        pass
-
     for i in range(2):
         for j in range(30, 38):
             for k in range(40, 48):
