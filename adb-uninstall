@@ -10,9 +10,10 @@ IFS='
 
 usage() {
   cat << EOF
-usage: $(basename "$0") [OPTION]... PATTERN
+usage: $(basename "$0") [OPTION]... PATTERN...
 
-Uninstall all packages matching PATTERN
+Uninstall all packages matching PATTERN.
+The PATTERNs will be used within awk.
 
 options:
   -f     force uninstall, do not ask
@@ -47,7 +48,7 @@ done
 shift $((OPTIND-1))
 
 pattern="$1"
-if test -z "$pattern"; then
+if [ $# -lt 1 ]; then
   printf "No pattern given\n\n" >&2
   usage
   exit 2
@@ -60,8 +61,11 @@ if ! timeout --foreground 5 adb wait-for-device; then
 fi
 
 packages=$(adb shell pm list packages -f |\
-  sed -e 's/[^[:print:]]$//' |\
-  awk 'BEGIN { FS="="} $2 ~ /'"$pattern"'/ { print $2 }')
+  sed -e 's/[^[:print:]]$//')
+
+for pattern in "$@"; do
+  packages=$(echo "$packages" |awk 'BEGIN { FS="="} $2 ~ /'"$pattern"'/ { print $2 }')
+done
 
 if test -z "$packages"; then
   printf "No packages found matching <%s>\n" "$pattern" >&2

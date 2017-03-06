@@ -1,0 +1,36 @@
+#!/bin/sh
+
+# exit if command fails.
+set -e
+
+usage() {
+  cat << EOF
+usage: $(basename "$0") [OPTION]...
+
+Factory reset the connected android device
+
+options:
+  -h     display this help message and exit
+EOF
+}
+
+while getopts "h" opt; do
+  case $opt in
+    h)
+      usage >&1 ; exit 0 ;;
+    /?)
+      usage >&2 ; exit 1 ;;
+  esac
+done
+
+shift $((OPTIND-1))
+
+adb start-server
+if ! timeout --foreground 5 adb wait-for-device; then
+  printf "No device found\n" >&2
+  exit 100
+fi
+
+adb shell am broadcast -a android.intent.action.MASTER_CLEAR
+
+# vim: ft=sh ts=2 sts=2 sw=2 et:
