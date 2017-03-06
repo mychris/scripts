@@ -1,0 +1,80 @@
+#!/usr/bin/env python3
+
+import sys
+import argparse
+from http import HTTPStatus
+
+__prog__ = "httpstatus"
+__version__ = 0.1
+__usage__ = ""
+__help__ = """
+%s
+
+Print information about http status codes.
+If no status code is given, print all known.
+If one or more status codes are given, print the phrase
+and the description of each of the provided status codes.
+
+options:
+  -s, --short     do not display the description
+  -h, --help      display this help and exit
+  -v, --version   output version information and exit
+""".lstrip()
+__version__ = "%s version %s" % (__prog__, __version__)
+
+def __print_help():
+  sys.stdout.write(__help__)
+  sys.exit(0)
+
+def __format(status, short=False):
+  if short:
+    return '%d %s' % (status.value, status.phrase)
+  if status.description:
+    return '%d %s\n%s\n' % (status.value, status.phrase, status.description)
+  return '%d %s\n' % (status.value, status.phrase) 
+
+def __match(a, b):
+  if a == b:
+    return True
+  if len(a) != 3 or len(b) != 3:
+    return False
+  for i in range(3):
+    if not (a.lower()[i] == 'x' or b.lower()[i] == 'x' or a[i] == b[i]):
+      return False
+  return True
+
+def __valid_status_param(status):
+  valid_codes = map(lambda cur: str(cur.value), list(HTTPStatus))
+  matches = map(lambda cur: __match(status, cur), valid_codes)
+  return any(matches)
+
+if __name__ == '__main__':
+  parser = argparse.ArgumentParser(prog=__prog__, add_help=False)
+  parser.add_argument('-s', '--short', action='store_true', dest='short', default=False)
+  parser.add_argument('-h', '--help', action='help')
+  parser.print_help = __print_help
+  parser.add_argument('-v', '--version', action='version')
+  parser.version = __version__
+  parser.add_argument('status', metavar='STATUS', nargs='*')
+
+  __usage__ = parser.format_usage()
+  __help__ = __help__ % parser.format_usage().strip()
+  args = parser.parse_args()
+
+  if not args.status:
+    args.status = [ 'xxx' ]
+    args.short = True
+  output = ""
+  for status in args.status:
+    if len(output) >= 1024 * 10:
+      sys.stderr.write('generated output too long\n')
+      sys.exit(2)
+    if not __valid_status_param(status):
+      sys.stderr.write("%s is not a valid http status code\n" % (status))
+      sys.exit(1)
+    for cur in list(HTTPStatus):
+      if __match(status, str(cur.value)):
+        output += __format(cur, args.short) + '\n'
+  sys.stdout.write(output.rstrip() + '\n')
+
+# vim: ft=python st=2 sts=2 sw=2 et:
