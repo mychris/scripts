@@ -1,31 +1,71 @@
 #!/bin/sh
-#
-# Prezi key bindings for the Logitech R400 Wireless Presenter
-#
+
+# exit if command fails.
+set -e
+
+usage() {
+  cat << EOF
+usage: $(basename "$0") [OPTION]... [TASK]
+
+Prezi key bindings for the Logitech R400 Wireless Presenter
+
+TASK can be either:
+  on      to configure key bindings for the presentation
+  off     to configure the key bindings back to normal
+  toggle  to swap the configurations
+
+The default TASK is toggle.
+
+options:
+  -v     be more verbose
+  -h     display this help message and exit
+EOF
+}
 
 prezi_start() {
   printf "Bound keys for prezi presentation\n"
-  printf "112 = Left, 117 = Right"
+  [ "$VERBOSE" -eq 1 ] && printf "112 = Left, 117 = Right\n"
   xmodmap -e "keycode 112 = Left" -e "keycode 117 = Right"
 }
 
 prezi_stop() {
-  printf "Bound keys back to normal"
-  printf "112 = Prior, 117 = Next"
+  printf "Bound keys back to normal\n"
+  [ "$VERBOSE" -eq 1 ] && printf "112 = Prior, 117 = Next\n"
   xmodmap -e "keycode 112 = Prior" -e "keycode 117 = Next"
 }
 
-if [ "$1" = "on" -o "$1" = "start" ]; then
-  prezi_start
-elif [ "$1" = "off" -o "$1" = "stop" ]; then
-  prezi_stop
-else
-  key112=$(xmodmap -pk | grep 112 | grep Prior)
-  if [ "z$key112" = "z" ]; then
-    prezi_stop
-  else
-    prezi_start
-  fi
-fi
+VERBOSE=0
+while getopts "vh" opt; do
+  case $opt in
+    v)
+      VERBOSE=1
+      ;;
+    h)
+      usage >&1 ; exit 0 ;;
+    /?)
+      usage >&2 ; exit 1 ;;
+  esac
+done
+shift $((OPTIND-1))
+
+task=${1:-"toggle"}
+case "$task" in
+  toggle)
+    if xmodmap -pk |grep "112" |grep --quiet "Prior"; then
+      prezi_start
+    else
+      prezi_stop
+    fi
+    ;;
+  on|start)
+    prezi_start ;;
+  off|stop)
+    prezi_stop ;;
+  *)
+    printf "Unknown TASK: '%s'\n" "$task" >&2
+    usage >&2
+    exit 2
+    ;;
+esac
 
 # vim: ft=sh ts=2 sts=2 sw=2 et:
