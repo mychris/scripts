@@ -1,35 +1,41 @@
 #!/bin/sh
+#
+# Find the public IP Address.
 
-# exit if command fails
-set -e
 # sane behaviour for cd
 unset CDPATH
 # set IFS to SP HT LF.
 IFS=' 	
 '
 
+commands="dig +time=%d +short myip.opendns.com @resolver1.opendns.com
+host -W %d myip.opendns.com resolver1.opendns.com
+curl -s --connecto-timeout %d https://api.ipfy.org
+wget -q -O- --tries=1 --timeout=%s https://api.ipify.org"
+
+
 usage () {
   cat << EOF
-usage: `basename "$0"` [OPTIONS]...
+Usage: $(basename "$0") [OPTIONS]...
 
 Display the public IP-Address.
 
 Options:
-  -v    verbose output
+  -t    timeout for operations in seconds (defaults to 5)
   -h    display this help and exit"
 EOF
 }
 
-verbose=0
+timeout=5
 
-while getopts "vh" opt; do
+while getopts "t:h" opt; do
   case "$opt" in
     h)
       usage
       exit 0
       ;;
-    v)
-      verbose=1
+    t)
+      timeout="${OPTARG}"
       ;;
     \?)
       usage
@@ -40,18 +46,42 @@ done
 
 shift $((OPTIND-1))
 
-if command -v dig >/dev/null 2>&1; then
-  [ "$verbose" -eq 1 ] && set -o xtrace
-  dig +short @resolver1.opendns.com myip.opendns.com
-elif command -v curl >/dev/null 2>&1; then
-  [ "$verbose" -eq 1 ] && set -o xtrace
-  curl -s "http://checkip.dyndns.org" | grep --color=never -o "[[:digit:].]\+"
-elif command -v wget >/dev/null 2>&1; then
-  [ "$verbose" -eq 1 ] && set -o xtrace
-  wget -q -O- "http://checkip.dyndns.org" | grep --color=never -o "[[:digit:].]\+"
-else
-  printf "No suitable ommand found.\n\n"
+# Try as many different programs as possible. Fastest ones first.
+# Make sure, that if one program is available but fails
+# (because of firewalls or other stuff) the other possibilities are tried.
+#
+# Possible additional commands:
+#   host myip.opendns.com resolver1.opendns.com
+#   lynx --dump "https://api.ipify.org"
+#   w3m ??
+#   elinks ??
+#   perl ??
+#   python2 ??
+#   python3 ??
+success=-1
+result=""
+if [ $success -ne 0 ] && command -v dig >/dev/null 2>&1; then
+  result="$(dig +time="${timeout}" +short myip.opendns.com @resolver1.opendns.com)"
+  success=$?
+fi
+if [ $success -ne 0 ] && command -v host >/dev/null 2>&1; then
+  result="$(host -W "${timeout}" myip.opendns.com resolver1.opendns.com)"
+  success=$?
+fi
+if [ $success -ne 0 ] && command -v curl >/dev/null 2>&1; then
+  result="$(curl -s --connect-timeout "${timeout}" "https://api.ipify.org")"
+  success=$?
+fi
+if [ $success -ne 0 ] && command -v wget >/dev/null 2>&1; then
+  result="$(wget -q -O- --tries=1 --timeout="${timeout}" "https://api.ipify.org")"
+  success=$?
+fi
+if [ $success -eq -1 ]; then
+  printf "No suitable command found.\n\n"
   exit 120
 fi
+
+[ $success -eq 0 ] && printf "%s\n" "$result"
+exit "$success"
 
 # vim: ft=sh ts=2 sts=2 sw=2 et:
