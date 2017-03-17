@@ -36,7 +36,7 @@ if [ "$#" -lt 1 ]; then
 fi
 
 ec=0
-for file in $@; do
+for file in "$@"; do
   if [ "$file" = "-" ]; then
     file=/dev/stdin
   elif [ ! -e "$file" ]; then
