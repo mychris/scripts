@@ -1,0 +1,16 @@
+#!/bin/sh
+
+set -eu
+unset CDPATH
+IFS=' 	
+'
+
+if test $(command -v keepassxc); then
+  exec keepassxc "$@"
+elif test $(command -v keepassx2); then
+  exec keepassx2 "$@"
+else
+  exec keepassx "$@"
+fi
+
+# vim: ft=sh ts=2 sts=2 sw=2 et:
