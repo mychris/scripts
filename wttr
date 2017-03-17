@@ -1,0 +1,64 @@
+#!/bin/sh
+
+set -eu
+unset CDPATH
+IFS=' 	
+'
+
+usage() {
+  cat <<EOF
+usage: $0 [OPTIONS]... [LOCATION]
+
+wttr.in — the right way to check the weather:
+* https://github.com/chubin/wttr.in
+* http://wttr.in/
+
+options:
+  -0     only current weather
+  -1     current weather + 1 day
+  -2     current weather + 2 days
+  -3     current weather + 3 days
+  -n     narrow version (only day and night)
+  -w     wide version (morning, noon, evening and night)
+  -H     display wttr help
+  -h     display this help and exit
+EOF
+}
+
+days=3
+narrow=''
+wttrhelp=0
+[ "$(tput cols || echo 130)" -lt 130 ] && narrow='n'
+while getopts "0123nwHh" opt; do
+  case $opt in
+    0)  days=0 ;;
+    1)  days=1 ;;
+    2)  days=2 ;;
+    3)  days=3 ;;
+    n)  narrow='n' ;;
+    w)  narrow='' ;;
+    H)  wttrhelp=1 ;;
+    h)  usage >&1 ; exit 0 ;;
+    /?) usage >&2 ; exit 1 ;;
+  esac
+done
+shift $((OPTIND-1))
+
+location="${1:-}"
+opt=""
+opt="${opt}${days}"
+opt="${opt}${narrow}"
+
+if [ $wttrhelp -eq 1 ]; then
+  location=':help'
+  opt=''
+fi
+
+if [ "x${opt}" != "x" ]; then
+  opt="?${opt}"
+fi
+url="http://wttr.in/${location}${opt}"
+
+curl -H "Accept-Language: ${LANG%_*}" "${url}"
+
+# vim: ft=sh ts=2 sts=2 sw=2 et:
