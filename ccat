@@ -1,54 +1,60 @@
 #!/bin/sh
 
-# exit if command fails
-set -e
-# sane behaviour for cd
+set -eu
 unset CDPATH
-# set IFS to SP HT LF.
 IFS=' 	
 '
 
 usage () {
   cat << EOF
-usage: $(basename "$0") [OPTION]... FILE
+usage: $0 [OPTION]... [FILE]...
+
+Colorized cat.
+With no FILE, or if FILE is -, read STDIN.
 
 options:
-  -h    display this help and exit
+  -h     display this help and exit
 EOF
 }
 
 while getopts "h" opt; do
   case "$opt" in
-    h)
-      usage >&1
-      exit 0
-      ;;
-    \?)
-      usage >&2
-      exit 1
-      ;;
+    h)  usage >&1 ; exit 0 ;;
+    \?) usage >&2 ; exit 1 ;;
   esac
 done
-
 shift $((OPTIND-1))
 
-file="$1"
-
-if ! which pygmentize >/dev/null 2>&1; then
+if ! $(command -v pygmentize >/dev/null 2>&1); then
   printf "pygmentize not found.\neasy_install it.\n" >&2
   exit 127
 fi
 
-if [ -z "$file" ]; then
-  file=/dev/stdin
-elif [ ! -e "$1" ]; then
-  printf "%s: %s: No such file or directory" "$(basename "$0")" "$file" >&2
-  exit 2
-elif [ -d "$file" ]; then
-  printf "%s: %s: Is a directory" "$(basename "$0")" "$file" >&2
-  exit 2
+if [ "$#" -lt 1 ]; then
+  pygmentize -f terminal -g
+  exit $?
 fi
 
-pygmentize -f terminal -g $file
+ec=0
+for file in $@; do
+  if [ "$file" = "-" ]; then
+    file=/dev/stdin
+  elif [ ! -e "$file" ]; then
+    printf "%s: %s: No such file or directory\n" "$0" "$file" >&2
+    ec=1
+    continue
+  elif [ -d "$file" ]; then
+    printf "%s: %s: Is a directory\n" "$0" "$file" >&2
+    ec=1
+    continue
+  elif [ ! -r "$file" ]; then
+    printf "%s: %s: Permission denied\n" "$0" "$file" >&2
+    ec=1
+    continue
+  fi
+  pygmentize -f terminal -g "$file"
+done
+
+exit $ec
 
 # vim: ft=sh ts=2 sts=2 sw=2 et:
