@@ -1,0 +1,27 @@
+#!/bin/sh
+
+usage () {
+  printf "Usage: %s [OPTIONS]... KEYWORD...\n" "$(basename "$0")"
+  printf "Equivalent to \`apropos -l\`, but with better format.\n"
+  printf "see \`man 1 apropos\`.\n"
+  printf "Options:\n"
+  printf "  -e    search each keyword for exact match\n"
+  printf "  -r    interpret each keyword as a regex\n"
+  printf "  -w    the keyword(s) contain wildcards\n"
+  printf "  -a    require all keywords to match\n"
+  printf "  -h    display this help and exit\n"
+}
+
+FLAGS=""
+while getopts "erwah?" opt; do
+  case "$opt" in
+    e|r|w|a)  FLAGS="${FLAGS} -${opt}" ;;
+    h)  usage >&1 ; exit 0 ;;
+    \?) usage >&2 ; exit 1 ;;
+  esac
+done
+shift $((OPTIND-1))
+
+exec apropos -l $FLAGS -- "$@" |sed 's|\(.*\) (\(.*\)) * - |man \2 \1 # |'
+
+# vim: ft=sh ts=2 sts=2 sw=2 et:
